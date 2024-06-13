@@ -34,14 +34,6 @@ def infer_type(value):
         pass
     if value.lower() in ['true', 'false']:
         return value.lower() == 'true'
-    try:
-        return datetime.datetime.strptime(value, '%Y-%m-%d').date()
-    except ValueError:
-        pass
-    try:
-        return datetime.datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
-    except ValueError:
-        pass
     return value
 
 def csv_to_json(csv_file_path):
@@ -99,7 +91,7 @@ def process_csv_folder(folder_path):
             new_collection_name = new_collection.name
             get_new_collection = scope.collection(new_collection_name)
             
-            if new_collection is not None:
+            if new_collection is not None and collection_name == 'drivers' or collection_name == 'races':
                 print("INSERT")
                 file_path = os.path.join(folder_path, filename)
                 json_data = csv_to_json(file_path)
