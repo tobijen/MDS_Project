@@ -38,6 +38,7 @@ join_drivers_race as (
 		ra."name" as race_name,
 		ra."date" as race_date,
 		jc.raceid,
+		jc.statusid,
 		jc.driverid
 	from join_constructors as jc
 		left join public.drivers as dr
@@ -46,7 +47,7 @@ join_drivers_race as (
 		on ra.raceid = jc.raceid 
 ),
 
-join_pit_stops as (
+join_status as (
 	select 
 		jdr.constructor_name,
 		jdr.grid,
@@ -58,18 +59,13 @@ join_pit_stops as (
 		jdr.surname,
 		jdr.race_name,
 		jdr.race_date,
-		ps.stop as num_pitstop,
-		ps.lap as pitstop_at_lap,
-		ps.milliseconds as duration_pitstop
+		st.status
 	from join_drivers_race as jdr
-		left join public.pit_stops as ps
-		on
-			ps.raceid = jdr.raceid
-		and 
-			ps.driverid = jdr.driverid
+		left join public.status as st
+		on st.statusid = jdr.statusid
 ),
 
-filter_for_winner as (
+filter_for_damage as (
 	select
 		constructor_name,
 		grid,
@@ -81,24 +77,21 @@ filter_for_winner as (
 		surname,
 		race_name,
 		race_date,
-		num_pitstop,
-		pitstop_at_lap,
-		duration_pitstop
-	from join_pit_stops
-	where "position" = '1'
+		status
+	from join_status
+	where "status" in ('Engine', 'Transmission', 'Hydraulics')
 ),
 
-get_avg_pitstop_time as (
-	select
-		race_name,
-		race_date,
-		avg(duration_pitstop::float) 
-	from filter_for_winner
+group_data_by_race_constructor as (
+	select 
+		count(constructor_name) as num_constructor_failure,
+		constructor_name,
+		race_name
+	from filter_for_damage
 	group by (
-		race_name,
-		race_date
+		constructor_name,
+		race_name
 	)
-	order by race_date desc
 )
 
-select * from get_avg_pitstop_time
+select * from group_data_by_race_constructor

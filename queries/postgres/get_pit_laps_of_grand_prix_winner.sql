@@ -88,17 +88,18 @@ filter_for_winner as (
 	where "position" = '1'
 ),
 
-get_avg_pitstop_time as (
+get_pitstop_laps as (
 	select
+		constructor_name,
 		race_name,
 		race_date,
-		avg(duration_pitstop::float) 
+		num_pitstop,
+		pitstop_at_lap,
+		duration_pitstop
 	from filter_for_winner
-	group by (
-		race_name,
-		race_date
-	)
-	order by race_date desc
+	order by 
+		race_date desc,
+		num_pitstop asc
 )
 
-select * from get_avg_pitstop_time
+select * from get_pitstop_laps
