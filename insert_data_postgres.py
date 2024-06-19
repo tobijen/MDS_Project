@@ -11,9 +11,9 @@ directory = 'csv_data'  # Update with the actual path to your folder
 db_params = {
     'dbname': 'postgres',    # Replace with your database name
     'user': 'postgres',     # Replace with your database username
-    'password': 'pass', # Replace with your database password
-    'host': 'localhost',         # Replace with your database host
-    'port': '5432'               # Replace with your database port (default is 5432)
+    'password': 'pass',     # Replace with your database password
+    'host': 'localhost',    # Replace with your database host
+    'port': '5432'          # Replace with your database port (default is 5432)
 }
 
 # Mapping from Pandas data types to PostgreSQL data types
@@ -79,16 +79,18 @@ try:
             tuples = [tuple(x) for x in df.to_numpy()]
             cols = ','.join(list(df.columns))
 
+            print(tuples, cols)
+
             # Generate INSERT INTO statement
-            insert_sql = sql.SQL("INSERT INTO {} ({}) VALUES %s").format(
+            """             insert_sql = sql.SQL("INSERT INTO {} ({}) VALUES %s").format(
                 sql.Identifier(table_name),
                 sql.SQL(cols)
-            )
+            ) """
 
             # Use psycopg2's execute_values to insert the data in bulk
             from psycopg2.extras import execute_values
-            execute_values(cur, insert_sql, tuples)
-            conn.commit()
+            #execute_values(cur, insert_sql, tuples)
+            #conn.commit()
             print(f"Data from '{filename}' inserted successfully into '{table_name}'.")
 
 except Exception as e:

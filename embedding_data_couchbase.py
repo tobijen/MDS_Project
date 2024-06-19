@@ -23,20 +23,80 @@ public_bucket = cluster.bucket('mds_project')
 public_scope = public_bucket.scope('public')
 public_collection = public_scope.collection('documents')  # Replace 'documents' with your actual collection name
 
-""" def migrate_result(result_id, driver_id):
+def migrate_result(migrate_ids):
+
+    result_id = migrate_ids["resultId"]
+    constructor_id = migrate_ids["constructorId"]
+    race_id = migrate_ids["raceId"]
+    driver_id = migrate_ids["driverId"]
+
     try:
         # Fetch the author document from 'dev' scope
-        results_query = f"SELECT * FROM `my_bucket`.`dev`.`results` WHERE `resultid`='{result_id}'"
+        results_query = f"SELECT * FROM `mds_project`.`dev`.`results` WHERE `resultId`={result_id}"
         results_result = cluster.query(results_query)
-        result_data = results_result.rows()[0]['documents']  # Adjust as per your document structure
-        logging.info(f"Fetched author data: {result_data}")
+        result_rows = results_result.rows()  # Adjust as per your document structure
+        # Print the data
+        if not result_rows:
+            print("No results found.")
+            return None
+        
+        for row in result_rows:
+            results_data = row
+            print(f"Fetched results data: {row}")
 
         # Fetch related book documents from 'dev' scope
-        driver_query = f"SELECT * FROM `my_bucket`.`dev`.`drivers` WHERE `driverid`='{driver_id}'"
-        books_result = cluster.query(driver_query)
-        books_data = [row['documents'] for row in books_result]  # Adjust as per your document structure
-        logging.info(f"Fetched books data: {books_data}")
+        driver_query = f"SELECT * FROM `mds_project`.`dev`.`drivers` WHERE driverId={driver_id}"
+        driver_result = cluster.query(driver_query)
+        driver_rows = driver_result.rows()  # Adjust as per your document structure
+        # Print the data
+        if not driver_rows:
+            print("No results found.")
+            return None
+        
+        for row in driver_rows:
+            driver_data = row
+            print(f"Fetched driver data: {row}")
 
+
+        # Fetch related book documents from 'dev' scope
+        race_query = f"SELECT * FROM `mds_project`.`dev`.`races` WHERE raceId={race_id}"
+        race_result = cluster.query(race_query)
+        race_rows = race_result.rows()  # Adjust as per your document structure
+        # Print the data
+        if not race_rows:
+            print("No results found.")
+            return None
+        
+        for row in race_rows:
+            race_data = row
+            print(f"Fetched race data: {row}")
+
+        # Fetch related book documents from 'dev' scope
+        constructor_query = f"SELECT * FROM `mds_project`.`dev`.`constructors` WHERE constructorId={constructor_id}"
+        constructor_result = cluster.query(constructor_query)
+        constructor_rows = constructor_result.rows()  # Adjust as per your document structure
+        # Print the data
+        if not constructor_rows:
+            print("No results found.")
+            return None
+        
+        for row in constructor_rows:
+            constructors_data = row
+            print(f"Fetched constructor data: {row}")
+
+        # Fetch related book documents from 'dev' scope
+        pitstop_query = f"SELECT * FROM `mds_project`.`dev`.`pit_stops` WHERE driverId={driver_id} and raceId={race_id}"
+        pitstop_result = cluster.query(pitstop_query)
+        pitstop_rows = pitstop_result.rows()  # Adjust as per your document structure
+        # Print the data
+        if not pitstop_rows:
+            print("No results found.")
+            return None
+     
+        for row in pitstop_rows:
+            print(f"Fetched pit stops data: {row}")
+
+        """ 
         # Embed books into the author document
         author_data['books'] = [
             {"book_id": book['book_id'], "title": book['title']}
@@ -57,12 +117,12 @@ public_collection = public_scope.collection('documents')  # Replace 'documents' 
         # Optionally, remove the original author document from 'dev' scope
         dev_collection.remove(author_id)
         logging.info(f"Removed original author document from 'dev' scope: {author_id}")
-
+        """
     except CouchbaseException as e:
-        logging.error(f"Error during migration: {e}") """
+        logging.error(f"Error during migration: {e}")
 
 # Example usage
-#migrate_author('author::1')
+migrate_result({'constructorId': 51, 'driverId': 855, 'raceId': 1108, 'resultId': 26040})
 
 # Function to migrate multiple authors
 def migrate_all_results():
@@ -82,4 +142,4 @@ def migrate_all_results():
         logging.error(f"Error during migration: {e}")
 
 # Example usage for migrating all authors
-migrate_all_results()
+#migrate_all_results()
