@@ -1,0 +1,14 @@
+SELECT 
+    doc.race.race_name AS race_name,
+    doc.race.date AS race_date,
+    AVG(pitstop.milliseconds) AS avg_pit_stop_time_ms
+FROM 
+    `mds_project`.`public`.`f1_results_embedded` AS doc
+UNNEST 
+    doc.pitStops AS pitstop
+WHERE 
+    doc.position = "1"
+GROUP BY 
+    doc.race.race_name, doc.race.date
+ORDER BY 
+    doc.race.date desc;
