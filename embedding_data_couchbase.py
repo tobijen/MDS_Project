@@ -21,7 +21,7 @@ dev_collection_races = dev_scope.collection('pit_stops')  # Replace 'documents' 
 
 public_bucket = cluster.bucket('mds_project')
 public_scope = public_bucket.scope('public')
-public_collection = public_scope.collection('documents')  # Replace 'documents' with your actual collection name
+public_collection = public_scope.collection('results_combined')  # Replace 'documents' with your actual collection name
 
 def migrate_result(migrate_ids):
 
@@ -29,6 +29,7 @@ def migrate_result(migrate_ids):
     constructor_id = migrate_ids["constructorId"]
     race_id = migrate_ids["raceId"]
     driver_id = migrate_ids["driverId"]
+    status_id = migrate_ids["statusId"]
 
     try:
         # Fetch the author document from 'dev' scope
@@ -84,6 +85,19 @@ def migrate_result(migrate_ids):
             constructors_data = row
             print(f"Fetched constructor data: {row}")
 
+
+        status_query = f"SELECT * FROM `mds_project`.`dev`.`status` WHERE statusId={status_id}"
+        status_result = cluster.query(status_query)
+        status_rows = status_result.rows()  # Adjust as per your document structure
+        # Print the data
+        if not status_rows:
+            print("No results found.")
+            return None
+        
+        for row in status_rows:
+            status_data = row
+            print(f"Fetched status data: {row}")
+
         # Fetch related book documents from 'dev' scope
         pitstop_query = f"SELECT * FROM `mds_project`.`dev`.`pit_stops` WHERE driverId={driver_id} and raceId={race_id}"
         pitstop_result = cluster.query(pitstop_query)
@@ -93,53 +107,60 @@ def migrate_result(migrate_ids):
             print("No results found.")
             return None
      
+        pitstop_data = []
         for row in pitstop_rows:
+            pitstop_data.append(row)
             print(f"Fetched pit stops data: {row}")
 
-        """ 
+        results_data = results_data["results"]
+
         # Embed books into the author document
-        author_data['books'] = [
-            {"book_id": book['book_id'], "title": book['title']}
-            for book in books_data
+        results_data['driver'] = driver_data["drivers"]
+
+        # Embed books into the author document
+        results_data['race'] = race_data["races"]
+
+        # Embed books into the author document
+        results_data['constructor'] = constructors_data["constructors"]
+
+        results_data['status'] = status_data["status"]["status"]
+
+        results_data['pitstops'] = [
+            {'milliseconds': pitstop["pit_stops"]["milliseconds"], "lap": pitstop["pit_stops"]["lap"], "stop": pitstop["pit_stops"]["stop"]}
+            for pitstop in pitstop_data
         ]
 
+        # clean results data by removong unnecessary keys
+        results_data = {key: value for key, value in results_data.items() if key not in ("constructorId", "raceId", "driverId", "statusId")}
+        print("RESULTS: ", results_data)
+
         # Insert the new document into 'public' scope
-        new_doc_id = author_data['author_id']
-        public_collection.upsert(new_doc_id, author_data)
+        new_doc_id = str(results_data['resultId'])
+        public_collection.upsert(new_doc_id, results_data)
         logging.info(f"Inserted document into 'public' scope: {new_doc_id}")
 
-        # Optionally, remove the old book documents from 'dev' scope
-        for book in books_data:
-            old_doc_id = book['book_id']
-            dev_collection.remove(old_doc_id)
-            logging.info(f"Removed old book document from 'dev' scope: {old_doc_id}")
-
-        # Optionally, remove the original author document from 'dev' scope
-        dev_collection.remove(author_id)
-        logging.info(f"Removed original author document from 'dev' scope: {author_id}")
-        """
     except CouchbaseException as e:
         logging.error(f"Error during migration: {e}")
 
 # Example usage
-migrate_result({'constructorId': 51, 'driverId': 855, 'raceId': 1108, 'resultId': 26040})
+#migrate_result({'constructorId': 51, 'driverId': 855, 'raceId': 1108, 'resultId': 26040, 'statusId': 1})
 
 # Function to migrate multiple authors
 def migrate_all_results():
     try:
         # Fetch all author IDs from 'dev' scope
-        migrate_ids_query = "SELECT resultId, driverId, raceId, constructorId FROM `mds_project`.`dev`.`results`"
+        migrate_ids_query = "SELECT resultId, driverId, raceId, statusId, constructorId FROM `mds_project`.`dev`.`results`"
         migrate_ids_result = cluster.query(migrate_ids_query)
         migrate_ids = [row for row in migrate_ids_result]
         logging.info(f"Fetched author IDs: {migrate_ids}")
 
         # Migrate each author
         for ids in migrate_ids:
-            #migrate_result(author_id)
+            migrate_result(ids)
             logging.info(f"Completed migration for author: {ids}")
 
     except CouchbaseException as e:
         logging.error(f"Error during migration: {e}")
 
 # Example usage for migrating all authors
-#migrate_all_results()
+migrate_all_results()
