@@ -1,0 +1,2 @@
+DELETE FROM `mds_project`.`public`.`f1_results_embedded`
+WHERE META().id LIKE "result::%";

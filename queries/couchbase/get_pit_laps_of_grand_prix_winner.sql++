@@ -1,0 +1,15 @@
+SELECT 
+    doc.race.race_name AS race_name,
+    doc.race.date AS race_date,
+    doc.constructor.constructor_name AS constructor_name,
+    pitstop.stop AS num_pitstop,
+    pitstop.lap AS pitstop_at_lap,
+    pitstop.duration AS duration_pitstop
+FROM 
+    `mds_project`.`public`.`f1_results_embedded` AS doc
+UNNEST 
+    doc.pitStops AS pitstop
+WHERE 
+    doc.position = "1"
+ORDER BY 
+    doc.race.date desc, doc.pitstop.stop asc

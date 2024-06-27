@@ -1,0 +1,18 @@
+SELECT
+    COUNT(doc.constructor.constructor_name) AS num_constructor_fail,
+    doc.constructor.constructor_name,
+    doc.race.race_name AS race_name,
+    doc.status,
+    doc.driver.forename || ' ' || doc.driver.surname AS driver,
+    doc.laps AS lap
+FROM 
+    `mds_project`.`public`.`f1_results_embedded` AS doc
+WHERE 
+    doc.status IN ["Engine", "Transmission", "Hydraulics"]
+GROUP BY 
+    doc.constructor.constructor_name,
+    doc.race.race_name,
+    doc.status,
+    doc.driver.forename,
+    doc.driver.surname,
+    doc.laps

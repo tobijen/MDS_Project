@@ -73,7 +73,7 @@ filter_for_damage as (
 		"time",
 		"position",
 		laps,
-		forename,
+		forename || surname as driver,
 		surname,
 		race_name,
 		race_date,
@@ -86,11 +86,17 @@ group_data_by_race_constructor as (
 	select 
 		count(constructor_name) as num_constructor_failure,
 		constructor_name,
-		race_name
+		race_name,
+		status,
+		driver,
+		laps as lap
 	from filter_for_damage
 	group by (
 		constructor_name,
-		race_name
+		race_name,
+		status,
+		laps,
+		driver
 	)
 )
 
