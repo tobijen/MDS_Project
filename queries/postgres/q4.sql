@@ -1,5 +1,4 @@
 -- SQL script to insert 20 new rows into the public.results table
--- Starting resultid is 26080
 
 INSERT INTO public.results (
     resultid, raceid, driverid, constructorid, number, grid, position, 

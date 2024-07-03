@@ -1,3 +1,4 @@
+-- get laps and occurences when failures happened
 SELECT
     COUNT(doc.constructor.constructor_name) AS num_constructor_fail,
     doc.constructor.constructor_name,

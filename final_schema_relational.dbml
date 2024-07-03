@@ -1,0 +1,78 @@
+Table status {
+  statusid int
+  status varchar
+}
+
+Table drivers {
+  driverid int
+  driverref varchar
+  number varchar
+  code varchar
+  forename varchar
+  surname varchar
+  dob varchar
+  nationality varchar
+  url varchar
+}
+
+Table races {
+  raceid int
+  year int
+  round int
+  name varchar
+  date varchar
+  time varchar
+  url varchar
+}
+
+Table constructors {
+  constructorid int
+  constructorref varchar
+  name varchar
+  nationality varchar
+  url varchar
+}
+
+Table pit_stops {
+  pitstopid int
+  stop int
+  lap int
+  time varchar
+  duration varchar
+  milliseconds int
+}
+
+Table results {
+  resultid int
+  raceid int
+  driverid int
+  constructorid int
+  pitstopid int
+  number varchar
+  grid int
+  position varchar
+  positiontext varchar
+  positionorder int
+  points float
+  laps int
+  time varchar
+  milliseconds varchar
+  fastestlap varchar
+  rank varchar
+  fastestlaptime varchar
+  fastestlapspeed varchar
+  statusid int
+}
+
+Ref: results.driverid > drivers.driverid // many-to-one
+
+Ref: results.raceid > races.raceid // many-to-one
+
+Ref: results.constructorid > constructors.constructorid // many-to-one
+
+Ref: results.statusid > status.statusid // many-to-one
+
+Ref: results.pitstopid < pit_stops.pitstopid // one-to-many
+
+
+

@@ -14,8 +14,10 @@
 ```console
 foo@bar/pathtofolder:~$ docker-compose up -d
 ```
-3. Insert data into Postgres: run file ```insert_data_postgres.py```
-4. Insert data into Postgres: run file ```insert_data_couchbase.py```
+3. Run the file ```./scripts/add_keys_to_tables.py``` to insert keys for pitstops in the needed tables
+3. Insert data into Postgres: run file ```./scripts/insert_data_postgres.py```
+4. To create embedded data for Couchbase run the file ```./scripts/embedding_csv_to_json.py``` to create embedded json data from csv files which will be stored in ```./json_data/output.json```.
+5. Insert the embedded JSON data into Couchbase by running ```./scripts/insert_embedded_data_couchbase.py```.
 
 ## Open databases
 
@@ -25,6 +27,11 @@ For opening and editing the couchbase simply go to the following url: http://loc
 <br>
 <br>
 Connect to the databases by adding the credentials from the docker-compose.yml
+
+## Queries
+
+- The queries for the postgres are stored in the folder ```./queries/postgres```
+- The queries for the couchbase are stored in the folder ```./queries/couchbase```
 
 ## Stop project
 

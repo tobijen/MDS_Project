@@ -1,3 +1,4 @@
+-- get pitstop laps per grand prix winner
 SELECT 
     doc.race.race_name AS race_name,
     doc.race.date AS race_date,
